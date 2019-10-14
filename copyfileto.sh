@@ -21,7 +21,7 @@ do
 
 	expect <<EOF
 	set timeout 60
-	spawn scp -r $src_dir $usr@$ip:$dst_dir
+	spawn rsync -av $src_dir $usr@$ip:$dst_dir
 	expect {
 		"yes/no" { send "yes\n";exp_continue }
 		"password" { send "$pw\n" }
