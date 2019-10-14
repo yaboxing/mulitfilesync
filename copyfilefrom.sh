@@ -3,7 +3,7 @@
 start_time=`date +%s`
 
 configfile=copyfilefrom.cfg
-work=2
+work=10
 log=record
 
 # 判断文件是否存在
@@ -19,6 +19,9 @@ if [ ! -d $log ]; then
 	mkdir $log
 	echo "[$log] created ..."
 fi
+
+# 清空原来的记录文件
+rm $log/* -rf
 
 # 建立有名管道用于多进程数量控制
 [ -e fd1 ] || mkfifo fd1
@@ -42,7 +45,7 @@ do
 	echo "receive [$src_dir] from [$usr@$ip:$dst_dir]"
 	{
 		expect <<EOF
-		set timeout 60
+		set timeout 600
 		spawn rsync -av $usr@$ip:$dst_dir $src_dir
 		expect {
 			"yes/no" { send "yes\n";exp_continue }
@@ -53,7 +56,7 @@ do
 EOF
 	echo >&3
 	echo "receive [$src_dir] from [$usr@$ip:$dst_dir] done."
-	} > $log/$usr@$ip.log &
+	} >> $log/$usr@$ip.log & # 以追加的方式增加记录文件, 避免多条同一个设备的传输记录被覆盖
 done < $configfile
 
 wait
